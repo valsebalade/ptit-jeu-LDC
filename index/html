@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Vote PSG vs Bayern</title>
+  <style>
+    body { font-family: Arial; background:#07122b; color:white; text-align:center; padding:30px; }
+    .card { background:#111f45; padding:25px; border-radius:16px; max-width:500px; margin:auto; }
+    button { margin:8px; padding:12px 18px; border:0; border-radius:10px; cursor:pointer; font-weight:bold; }
+    input { padding:10px; width:80px; border-radius:8px; border:0; margin:6px; }
+    .result { margin-top:20px; background:#1c2f66; padding:15px; border-radius:12px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>PSG vs Bayern</h1>
+    <h2>Vote du meilleur joueur</h2>
+
+    <div id="players"></div>
+
+    <h2>Ton pronostic</h2>
+    <p>
+      PSG <input id="psgScore" type="number" min="0" value="2" />
+      -
+      <input id="bayernScore" type="number" min="0" value="1" /> Bayern
+    </p>
+
+    <button onclick="savePrediction()">Valider mon score</button>
+
+    <div class="result">
+      <h3>Résultats sur ton appareil</h3>
+      <div id="results"></div>
+      <p id="prediction"></p>
+    </div>
+  </div>
+
+  <script>
+    const players = [
+      "Dembélé", "Mbappé", "Vitinha", "Hakimi", "Donnarumma",
+      "Kane", "Musiala", "Sané", "Kimmich", "Neuer"
+    ];
+
+    let votes = JSON.parse(localStorage.getItem("votes")) || {};
+    let prediction = localStorage.getItem("prediction") || "";
+
+    function renderPlayers() {
+      document.getElementById("players").innerHTML = players.map(player =>
+        `<button onclick="vote('${player}')">${player}</button>`
+      ).join("");
+    }
+
+    function vote(player) {
+      votes[player] = (votes[player] || 0) + 1;
+      localStorage.setItem("votes", JSON.stringify(votes));
+      renderResults();
+    }
+
+    function savePrediction() {
+      const psg = document.getElementById("psgScore").value;
+      const bayern = document.getElementById("bayernScore").value;
+      prediction = `Ton prono : PSG ${psg} - ${bayern} Bayern`;
+      localStorage.setItem("prediction", prediction);
+      renderResults();
+    }
+
+    function renderResults() {
+      const sorted = Object.entries(votes).sort((a,b) => b[1] - a[1]);
+      document.getElementById("results").innerHTML =
+        sorted.length
+          ? sorted.map(([p,v]) => `${p} : ${v} vote(s)`).join("<br>")
+          : "Aucun vote pour l’instant.";
+
+      document.getElementById("prediction").textContent = prediction;
+    }
+
+    renderPlayers();
+    renderResults();
+  </script>
+</body>
+</html>

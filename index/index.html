@@ -4,33 +4,199 @@
   <meta charset="UTF-8" />
   <title>Vote PSG vs Bayern</title>
   <style>
-    body { font-family: Arial; background:#07122b; color:white; text-align:center; padding:30px; }
-    .card { background:#111f45; padding:25px; border-radius:16px; max-width:500px; margin:auto; }
-    button { margin:8px; padding:12px 18px; border:0; border-radius:10px; cursor:pointer; font-weight:bold; }
-    input { padding:10px; width:80px; border-radius:8px; border:0; margin:6px; }
-    .result { margin-top:20px; background:#1c2f66; padding:15px; border-radius:12px; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Arial', sans-serif;
+      color: white;
+      text-align: center;
+      padding: 30px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(206, 17, 38, 0.7), rgba(11, 36, 71, 0.7)), 
+                  url('https://images.unsplash.com/photo-1577180920601-ba212a61e30f?w=1200&h=800&fit=crop') center/cover no-repeat fixed;
+    }
+    
+    .container {
+      max-width: 600px;
+      margin: auto;
+      backdrop-filter: blur(8px);
+    }
+    
+    .header {
+      margin-bottom: 40px;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    }
+    
+    .header h1 {
+      font-size: 3em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(45deg, #ff3333, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .header h2 {
+      font-size: 1.5em;
+      color: #ffd700;
+      font-weight: normal;
+    }
+    
+    .card { 
+      background: rgba(11, 36, 71, 0.85);
+      padding: 35px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      margin-bottom: 30px;
+    }
+    
+    .card h3 {
+      font-size: 1.3em;
+      margin: 25px 0 20px 0;
+      color: #ffd700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    #players {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin: 20px 0;
+    }
+    
+    button {
+      padding: 12px 18px;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.95em;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #CE112E, #FF5555);
+      color: white;
+      box-shadow: 0 4px 15px rgba(206, 17, 46, 0.4);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(206, 17, 46, 0.6);
+      background: linear-gradient(135deg, #FF5555, #CE112E);
+    }
+    
+    button:active {
+      transform: translateY(0);
+    }
+    
+    .prediction-section {
+      background: rgba(255, 215, 0, 0.1);
+      padding: 20px;
+      border-radius: 15px;
+      margin: 25px 0;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .prediction-section p {
+      font-size: 1.1em;
+      margin: 15px 0;
+    }
+    
+    input {
+      padding: 10px 15px;
+      width: 70px;
+      border-radius: 8px;
+      border: 2px solid #ffd700;
+      background: rgba(255, 215, 0, 0.1);
+      color: white;
+      text-align: center;
+      font-weight: bold;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    
+    input:focus {
+      outline: none;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+      background: rgba(255, 215, 0, 0.2);
+    }
+    
+    input::placeholder {
+      color: rgba(255, 215, 0, 0.5);
+    }
+    
+    .result { 
+      background: rgba(28, 47, 102, 0.8);
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 25px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+    }
+    
+    .result h3 {
+      margin-bottom: 15px;
+    }
+    
+    #results {
+      font-size: 1.05em;
+      line-height: 1.8;
+      color: #ffd700;
+    }
+    
+    #prediction {
+      margin-top: 15px;
+      color: #ff9999;
+      font-size: 1.1em;
+      font-weight: bold;
+    }
+    
+    .validate-btn {
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #0b2447;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    
+    .validate-btn:hover {
+      background: linear-gradient(135deg, #ffed4e, #ffd700);
+      box-shadow: 0 6px 25px rgba(255, 215, 0, 0.5);
+    }
   </style>
 </head>
 <body>
-  <div class="card">
-    <h1>PSG vs Bayern</h1>
-    <h2>Vote du meilleur joueur</h2>
+  <div class="container">
+    <div class="header">
+      <h1>⚽ PSG vs Bayern ⚽</h1>
+      <h2>Vote du meilleur joueur</h2>
+    </div>
 
-    <div id="players"></div>
+    <div class="card">
+      <h3>Qui est le meilleur joueur?</h3>
+      <div id="players"></div>
 
-    <h2>Ton pronostic</h2>
-    <p>
-      PSG <input id="psgScore" type="number" min="0" value="2" />
-      -
-      <input id="bayernScore" type="number" min="0" value="1" /> Bayern
-    </p>
+      <div class="prediction-section">
+        <h3>Ton pronostic</h3>
+        <p>
+          <strong style="color: #ff3333;">PSG</strong>
+          <input id="psgScore" type="number" min="0" value="2" />
+          <strong>-</strong>
+          <input id="bayernScore" type="number" min="0" value="1" />
+          <strong style="color: #0066ff;">Bayern</strong>
+        </p>
+        <button class="validate-btn" onclick="savePrediction()">✓ Valider mon score</button>
+      </div>
 
-    <button onclick="savePrediction()">Valider mon score</button>
-
-    <div class="result">
-      <h3>Résultats sur ton appareil</h3>
-      <div id="results"></div>
-      <p id="prediction"></p>
+      <div class="result">
+        <h3>📊 Résultats</h3>
+        <div id="results"></div>
+        <p id="prediction"></p>
+      </div>
     </div>
   </div>
 
@@ -68,7 +234,7 @@
       document.getElementById("results").innerHTML =
         sorted.length
           ? sorted.map(([p,v]) => `${p} : ${v} vote(s)`).join("<br>")
-          : "Aucun vote pour l’instant.";
+          : "Aucun vote pour l'instant.";
 
       document.getElementById("prediction").textContent = prediction;
     }

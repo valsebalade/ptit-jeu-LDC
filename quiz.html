@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Quiz IA - Tactiques du Match</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body { 
+      font-family: 'Arial', sans-serif;
+      color: white;
+      padding: 30px;
+      min-height: 100vh;
+      background: linear-gradient(135deg, rgba(206, 17, 38, 0.7), rgba(11, 36, 71, 0.7)), 
+                  url('https://images.unsplash.com/photo-1577180920601-ba212a61e30f?w=1200&h=800&fit=crop') center/cover no-repeat fixed;
+    }
+    
+    .container {
+      max-width: 900px;
+      margin: auto;
+      backdrop-filter: blur(8px);
+    }
+    
+    .header {
+      margin-bottom: 30px;
+      text-align: center;
+      text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+    }
+    
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      background: linear-gradient(45deg, #ff3333, #ffffff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+    }
+    
+    .nav-buttons a, .nav-buttons button {
+      padding: 10px 20px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background: rgba(255, 215, 0, 0.1);
+      color: #ffd700;
+      border: 2px solid #ffd700;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      font-size: 0.95em;
+    }
+    
+    .nav-buttons a:hover, .nav-buttons button:hover {
+      background: rgba(255, 215, 0, 0.2);
+      transform: translateY(-2px);
+    }
+    
+    .card { 
+      background: rgba(11, 36, 71, 0.85);
+      padding: 30px;
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      margin-bottom: 20px;
+    }
+    
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: 600px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-radius: 15px;
+      background: rgba(0, 0, 0, 0.3);
+      overflow: hidden;
+    }
+    
+    #messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    
+    .message {
+      padding: 15px;
+      border-radius: 12px;
+      word-wrap: break-word;
+      max-width: 85%;
+      animation: slideIn 0.3s ease;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.user {
+      align-self: flex-end;
+      background: linear-gradient(135deg, #CE112E, #FF5555);
+      border-bottom-right-radius: 3px;
+    }
+    
+    .message.ai {
+      align-self: flex-start;
+      background: rgba(255, 215, 0, 0.1);
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      border-bottom-left-radius: 3px;
+      max-width: 95%;
+    }
+    
+    .message.system {
+      align-self: center;
+      background: rgba(100, 150, 200, 0.2);
+      color: #87ceeb;
+      font-style: italic;
+      font-size: 0.9em;
+      max-width: 100%;
+    }
+    
+    .input-section {
+      padding: 20px;
+      border-top: 2px solid rgba(255, 215, 0, 0.3);
+      display: flex;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+    
+    #userInput {
+      flex: 1;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      background: rgba(255, 215, 0, 0.1);
+      color: white;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    
+    #userInput:focus {
+      outline: none;
+      border-color: #ffd700;
+      box-shadow: 0 0 15px rgba(255, 215, 0, 0.3);
+      background: rgba(255, 215, 0, 0.15);
+    }
+    
+    #userInput::placeholder {
+      color: rgba(255, 215, 0, 0.5);
+    }
+    
+    .send-btn {
+      padding: 12px 25px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: bold;
+      background: linear-gradient(135deg, #ffd700, #ffed4e);
+      color: #0b2447;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+    
+    .send-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(255, 215, 0, 0.4);
+    }
+    
+    .send-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+    
+    .api-section {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 20px;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+    
+    .api-section h3 {
+      color: #ffd700;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+    
+    .api-input-group {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    
+    .api-input-group input {
+      flex: 1;
+      min-width: 200px;
+      padding: 10px 15px;
+      border-radius: 8px;
+      border: 2px solid rgba(255, 215, 0, 0.3);
+      background: rgba(255, 215, 0, 0.1);
+      color: white;
+      font-size: 0.95em;
+    }
+    
+    .api-input-group input:focus {
+      outline: none;
+      border-color: #ffd700;
+      background: rgba(255, 215, 0, 0.15);
+    }
+    
+    .api-input-group button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background: linear-gradient(135deg, #CE112E, #FF5555);
+      color: white;
+      transition: all 0.3s ease;
+    }
+    
+    .api-input-group button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(206, 17, 46, 0.4);
+    }
+    
+    .status {
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 0.9em;
+      margin-top: 10px;
+    }
+    
+    .status.success {
+      background: rgba(0, 255, 0, 0.2);
+      color: #90ee90;
+    }
+    
+    .status.error {
+      background: rgba(255, 0, 0, 0.2);
+      color: #ff6b6b;
+    }
+    
+    .status.info {
+      background: rgba(0, 150, 255, 0.2);
+      color: #87ceeb;
+    }
+    
+    .loading {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #ffd700;
+      animation: pulse 1.5s infinite;
+      margin-left: 5px;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+    
+    .clear-btn {
+      padding: 8px 15px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      background: rgba(206, 17, 38, 0.8);
+      color: white;
+      transition: all 0.3s ease;
+      font-size: 0.9em;
+    }
+    
+    .clear-btn:hover {
+      background: rgba(206, 17, 38, 1);
+      transform: translateY(-2px);
+    }
+
+    .info-box {
+      background: rgba(0, 150, 255, 0.15);
+      border-left: 4px solid #87ceeb;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      font-size: 0.95em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>⚡ Quiz IA - Tactiques du Match</h1>
+      <p style="margin-top: 10px; color: #ffd700;">Dialogue interactif avec une IA experte en football</p>
+    </div>
+    
+    <div class="nav-buttons">
+      <a href="index/index.html">← Retour aux votes</a>
+      <button onclick="resetChat()" class="clear-btn">🔄 Nouveau chat</button>
+    </div>
+    
+    <div class="card">
+      <div class="api-section">
+        <h3>🔑 Configuration API (OpenAI)</h3>
+        <div class="api-input-group">
+          <input type="password" id="apiKey" placeholder="Entrez votre clé API OpenAI" />
+          <button onclick="saveApiKey()">Enregistrer clé</button>
+        </div>
+        <div id="apiStatus"></div>
+        <div class="info-box">
+          ℹ️ Obtenez une clé API gratuite sur <a href="https://platform.openai.com" target="_blank" style="color: #87ceeb;">platform.openai.com</a>. La clé est sauvegardée localement (pas envoyée à nos serveurs).
+        </div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="chat-container">
+        <div id="messages"></div>
+        <div class="input-section">
+          <input 
+            type="text" 
+            id="userInput" 
+            placeholder="Posez une question sur les tactiques, les équipes, les joueurs..."
+            onkeypress="if(event.key === 'Enter') sendMessage()"
+          />
+          <button class="send-btn" id="sendBtn" onclick="sendMessage()">Envoyer</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Configuration et stockage de la clé API
+    let apiKey = localStorage.getItem('openaiApiKey') || '';
+    let conversationHistory = [];
+    let isWaitingForResponse = false;
+
+    const systemPrompt = `Tu es un expert en football passionné et connaisseur des équipes actuelles. 
+Tu as une connaissance approfondie du football européen, des tactiques modernes, des joueurs actuels et des récentes actualités du foot.
+Tu es spécialisé dans l'analyse de matches PSG vs Bayern et tu peux discuter en détail des formations tactiques (4-3-3, 5-3-2, etc.).
+Tu dois poser des questions intelligentes pour relancer le joueur et créer un vrai dialogue sur les stratégies de match.
+Tu dois être enthousiaste, engageant et capable de débattre intelligemment.
+Tes réponses doivent être concises mais informatives.`;
+
+    function saveApiKey() {
+      const keyInput = document.getElementById('apiKey');
+      const key = keyInput.value.trim();
+      
+      if (!key) {
+        showStatus('Veuillez entrer une clé API', 'error');
+        return;
+      }
+      
+      if (!key.startsWith('sk-')) {
+        showStatus('La clé doit commencer par "sk-"', 'error');
+        return;
+      }
+      
+      localStorage.setItem('openaiApiKey', key);
+      apiKey = key;
+      keyInput.value = '';
+      showStatus('✓ Clé API enregistrée avec succès!', 'success');
+      
+      // Commencer avec une question IA
+      if (conversationHistory.length === 0) {
+        setTimeout(() => startQuiz(), 500);
+      }
+    }
+
+    function showStatus(message, type) {
+      const statusDiv = document.getElementById('apiStatus');
+      statusDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+      setTimeout(() => {
+        statusDiv.innerHTML = '';
+      }, 4000);
+    }
+
+    function addMessage(content, isUser = false) {
+      const messagesDiv = document.getElementById('messages');
+      const messageEl = document.createElement('div');
+      messageEl.className = `message ${isUser ? 'user' : 'ai'}`;
+      messageEl.textContent = content;
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      return messageEl;
+    }
+
+    function addLoadingMessage() {
+      const messagesDiv = document.getElementById('messages');
+      const messageEl = document.createElement('div');
+      messageEl.className = 'message ai';
+      messageEl.innerHTML = 'L\'IA réfléchit<span class="loading"></span>';
+      messageEl.id = 'loadingMessage';
+      messagesDiv.appendChild(messageEl);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      return messageEl;
+    }
+
+    function removeLoadingMessage() {
+      const loading = document.getElementById('loadingMessage');
+      if (loading) loading.remove();
+    }
+
+    async function startQuiz() {
+      if (!apiKey) {
+        addMessage('⚠️ Veuillez d\'abord entrer votre clé API OpenAI', false);
+        return;
+      }
+
+      addMessage('Bienvenue! Je suis ton coach IA. Commençons par discuter des tactiques du match PSG vs Bayern...', false);
+      conversationHistory = [];
+      
+      const initialQuestions = [
+        "Selon toi, quelle formation tactique devrait adopter le PSG pour contrer la domination du Bayern?",
+        "Qu'en penses-tu? Quels joueurs clés devraient jouer un rôle décisif dans cette rencontre?",
+        "Comment vois-tu le déroulé de ce match? Qui a l'avantage selon toi?"
+      ];
+      
+      const randomQuestion = initialQuestions[Math.floor(Math.random() * initialQuestions.length)];
+      setTimeout(() => addMessage(randomQuestion, false), 500);
+    }
+
+    async function sendMessage() {
+      if (!apiKey) {
+        showStatus('❌ Clé API non configurée', 'error');
+        return;
+      }
+
+      const input = document.getElementById('userInput');
+      const message = input.value.trim();
+
+      if (!message) return;
+      if (isWaitingForResponse) return;
+
+      // Ajouter le message de l'utilisateur
+      addMessage(message, true);
+      input.value = '';
+
+      // Ajouter à l'historique
+      conversationHistory.push({
+        role: 'user',
+        content: message
+      });
+
+      isWaitingForResponse = true;
+      document.getElementById('sendBtn').disabled = true;
+      addLoadingMessage();
+
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              { role: 'system', content: systemPrompt },
+              ...conversationHistory
+            ],
+            temperature: 0.8,
+            max_tokens: 300
+          })
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.error?.message || `Erreur API: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const aiMessage = data.choices[0].message.content;
+
+        // Ajouter à l'historique
+        conversationHistory.push({
+          role: 'assistant',
+          content: aiMessage
+        });
+
+        removeLoadingMessage();
+        addMessage(aiMessage, false);
+
+      } catch (error) {
+        removeLoadingMessage();
+        console.error('Erreur:', error);
+        
+        let errorMessage = '❌ Erreur: ';
+        if (error.message.includes('401')) {
+          errorMessage += 'Clé API invalide ou expirée';
+        } else if (error.message.includes('429')) {
+          errorMessage += 'Trop de requêtes, attendez un moment';
+        } else if (error.message.includes('exceeded')) {
+          errorMessage += 'Quota API dépassé';
+        } else {
+          errorMessage += error.message;
+        }
+        
+        addMessage(errorMessage, false);
+      } finally {
+        isWaitingForResponse = false;
+        document.getElementById('sendBtn').disabled = false;
+        document.getElementById('userInput').focus();
+      }
+    }
+
+    function resetChat() {
+      if (confirm('Êtes-vous sûr? Cela supprimera tout l\'historique du chat.')) {
+        conversationHistory = [];
+        document.getElementById('messages').innerHTML = '';
+        document.getElementById('userInput').value = '';
+        startQuiz();
+      }
+    }
+
+    // Initialisation au chargement
+    window.addEventListener('load', () => {
+      if (apiKey) {
+        showStatus('✓ Clé API chargée', 'info');
+        startQuiz();
+      } else {
+        addMessage('Bienvenue! 👋 Pour commencer le quiz IA, veuillez entrer votre clé API OpenAI dans la section configuration.', false);
+      }
+    });
+  </script>
+</body>
+</html>
